@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASG Operations Assistant — TD Securities</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --td-green:    #009A44;
+      --td-green-dk: #007A36;
+      --td-navy:     #1A1F36;
+      --td-navy-lt:  #252B47;
+      --bg:          #F4F5F7;
+      --card:        #FFFFFF;
+      --border:      #DDE1EA;
+      --text:        #1A1F36;
+      --text-muted:  #6B7280;
+      --user-bubble: #009A44;
+      --bot-bubble:  #F0F2F5;
+      --error:       #DC2626;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--td-navy);
+      color: #fff;
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      border-bottom: 3px solid var(--td-green);
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .logo-block {
+      background: var(--td-green);
+      color: #fff;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+      padding: 6px 10px;
+      border-radius: 4px;
+    }
+    .header-title { font-size: 16px; font-weight: 600; }
+    .header-sub { font-size: 11px; color: #9CA3AF; letter-spacing: 0.5px; text-transform: uppercase; }
+    .status-pill {
+      background: rgba(0,154,68,0.2);
+      color: var(--td-green);
+      border: 1px solid var(--td-green);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Main layout ── */
+    main {
+      flex: 1;
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ── */
+    aside {
+      width: 260px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .card-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    /* API key input */
+    .api-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+    #apiKeyInput {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: monospace;
+      background: #F9FAFB;
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+    #apiKeyInput:focus { outline: none; border-color: var(--td-green); }
+    #apiKeyStatus { font-size: 11px; color: var(--td-green); margin-top: 4px; min-height: 14px; }
+
+    /* Deal badges */
+    .deal-list { display: flex; flex-direction: column; gap: 6px; }
+    .deal-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      font-size: 12px;
+    }
+    .deal-badge:hover { border-color: var(--td-green); background: #F0FBF4; }
+    .deal-id { font-weight: 700; color: var(--td-green); font-size: 11px; }
+    .deal-info { line-height: 1.3; }
+    .deal-name { font-size: 11px; color: var(--text-muted); }
+
+    /* Health dots */
+    .health-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+    .health-dot.green  { background: #22c55e; box-shadow: 0 0 4px #22c55e88; }
+    .health-dot.amber  { background: #f59e0b; box-shadow: 0 0 4px #f59e0b88; }
+    .health-dot.red    { background: #dc2626; box-shadow: 0 0 4px #dc262688; }
+
+    /* Workflow note */
+    .workflow-note {
+      font-size: 12px;
+      font-style: italic;
+      color: var(--text-muted);
+      margin-top: 6px;
+      padding: 6px 10px;
+      border-left: 3px solid var(--td-green);
+      background: #f0fbf4;
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* Sample prompts */
+    .prompt-list { display: flex; flex-direction: column; gap: 6px; }
+    .prompt-chip {
+      font-size: 12px;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.15s;
+      line-height: 1.3;
+    }
+    .prompt-chip:hover { border-color: var(--td-green); color: var(--td-navy); background: #F0FBF4; }
+
+    /* ── Chat panel ── */
+    .chat-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px 8px 0 0;
+      border-bottom: none;
+    }
+
+    .message { display: flex; flex-direction: column; max-width: 85%; }
+    .message.user { align-self: flex-end; align-items: flex-end; }
+    .message.assistant { align-self: flex-start; align-items: flex-start; }
+
+    .bubble {
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .message.user .bubble {
+      background: var(--user-bubble);
+      color: #fff;
+      border-bottom-right-radius: 3px;
+    }
+    .message.assistant .bubble {
+      background: var(--bot-bubble);
+      color: var(--text);
+      border-bottom-left-radius: 3px;
+      border: 1px solid var(--border);
+    }
+    .message.error .bubble {
+      background: #FEF2F2;
+      color: var(--error);
+      border: 1px solid #FECACA;
+    }
+
+    .msg-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      padding: 0 4px;
+    }
+
+    /* Typing indicator */
+    .typing-dots { display: flex; gap: 4px; align-items: center; padding: 10px 14px; }
+    .typing-dots span {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      animation: bounce 1.2s infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-6px); }
+    }
+
+    /* Welcome message */
+    .welcome {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+    .welcome .welcome-icon { font-size: 36px; margin-bottom: 12px; }
+    .welcome h3 { font-size: 16px; color: var(--text); margin-bottom: 6px; }
+    .welcome p { font-size: 13px; line-height: 1.5; }
+
+    /* Input bar */
+    .input-bar {
+      display: flex;
+      gap: 8px;
+      padding: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 0 0 8px 8px;
+    }
+    #userInput {
+      flex: 1;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13.5px;
+      font-family: inherit;
+      resize: none;
+      height: 40px;
+      transition: border-color 0.2s, height 0.1s;
+      color: var(--text);
+    }
+    #userInput:focus { outline: none; border-color: var(--td-green); }
+    #sendBtn {
+      background: var(--td-green);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0 18px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    #sendBtn:hover:not(:disabled) { background: var(--td-green-dk); }
+    #sendBtn:disabled { background: #9CA3AF; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo-block">TD</div>
+    <div>
+      <div class="header-title">ASG Securitization Operations Assistant</div>
+      <div class="header-sub">TD Securities · Asset Securitization Group</div>
+    </div>
+  </div>
+  <div class="status-pill">● MCP CONNECTED</div>
+</header>
+
+<main>
+  <!-- Sidebar -->
+  <aside>
+    <!-- API Key -->
+    <div class="card">
+      <div class="card-title">OpenAI API Key</div>
+      <div class="api-label">Paste your key to connect</div>
+      <input
+        type="password"
+        id="apiKeyInput"
+        placeholder="sk-..."
+        value="{{ default_api_key }}"
+        autocomplete="off"
+      />
+      <div id="apiKeyStatus">{{ '✓ Key loaded from .env' if default_api_key else '' }}</div>
+    </div>
+
+    <!-- Deals -->
+    <div class="card">
+      <div class="card-title">Active Deals</div>
+      <div class="deal-list">
+        <div class="deal-badge" onclick="fillPrompt('Give me a summary of deal AUTO-001')" title="AUTO-001: No exceptions">
+          <div>
+            <div class="deal-id">AUTO-001</div>
+            <div class="deal-info">TD Auto Receivables Trust</div>
+            <div class="deal-name">Auto Loans · 2024-1</div>
+          </div>
+          <div class="health-dot green" title="Clean — no exceptions"></div>
+        </div>
+        <div class="deal-badge" onclick="fillPrompt('Give me a summary of deal CARD-001')" title="CARD-001: OC/IC failure + delinquency breach">
+          <div>
+            <div class="deal-id">CARD-001</div>
+            <div class="deal-info">TD Credit Card Recv. Trust</div>
+            <div class="deal-name">Credit Cards · 2023-3</div>
+          </div>
+          <div class="health-dot red" title="OC/IC failure — payment blocked"></div>
+        </div>
+        <div class="deal-badge" onclick="fillPrompt('Give me a summary of deal ABCP-001')" title="ABCP-001: Missing servicer report">
+          <div>
+            <div class="deal-id">ABCP-001</div>
+            <div class="deal-info">Maple Leaf Conduit</div>
+            <div class="deal-name">ABCP · Series 2024-A</div>
+          </div>
+          <div class="health-dot amber" title="1 exception — missing servicer report"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sample Prompts -->
+    <div class="card">
+      <div class="card-title">Sample Prompts</div>
+      <div class="prompt-list">
+        <div class="prompt-chip" onclick="fillPrompt('Run the waterfall check for CARD-001 and explain the results.')">
+          Run waterfall check for CARD-001
+        </div>
+        <div class="prompt-chip" onclick="fillPrompt('Flag any exceptions across all three deals: AUTO-001, CARD-001, and ABCP-001.')">
+          Flag exceptions across all deals
+        </div>
+        <div class="prompt-chip" onclick="fillPrompt('Which deal has the highest pool balance? Give me summaries of all three.')">
+          Compare all deal balances
+        </div>
+        <div class="prompt-chip" onclick="fillPrompt('Run a full review of CARD-001: deal summary, waterfall check, and exception report.')">
+          Full review of CARD-001
+        </div>
+        <div class="prompt-chip" onclick="fillPrompt('Which deals are showing exceptions today and what action should operations take?')">
+          Daily exceptions review
+        </div>
+        <div class="prompt-chip" onclick="fillPrompt('Generate the payment summary for AUTO-001 — is it ready to submit?')">
+          Payment summary for AUTO-001
+        </div>
+        <div class="prompt-chip" onclick="fillPrompt('Show me a portfolio comparison of all deals.')">
+          Portfolio comparison (all deals)
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Chat panel -->
+  <div class="chat-panel">
+    <div id="messages">
+      <div class="welcome" id="welcomeMsg">
+        <div class="welcome-icon">🏦</div>
+        <h3>Welcome to ASG Operations Assistant</h3>
+        <p>Ask about deal summaries, waterfall results, and exception reports.<br/>
+        Select a deal or sample prompt on the left to get started.</p>
+      </div>
+    </div>
+    <div class="input-bar">
+      <textarea
+        id="userInput"
+        placeholder="Ask about a deal, waterfall, or exceptions…"
+        rows="1"
+      ></textarea>
+      <button id="sendBtn" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const apiKeyInput = document.getElementById('apiKeyInput');
+  const apiKeyStatus = document.getElementById('apiKeyStatus');
+  const userInput = document.getElementById('userInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const messagesEl = document.getElementById('messages');
+
+  apiKeyInput.addEventListener('input', () => {
+    const val = apiKeyInput.value.trim();
+    apiKeyStatus.textContent = val.startsWith('sk-') ? '✓ Key looks valid' : val ? '⚠ Key format unexpected' : '';
+    apiKeyStatus.style.color = val.startsWith('sk-') ? '#009A44' : '#DC2626';
+  });
+
+  userInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+  userInput.addEventListener('input', () => {
+    userInput.style.height = 'auto';
+    userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
+  });
+
+  function fillPrompt(text) {
+    userInput.value = text;
+    userInput.focus();
+    userInput.style.height = 'auto';
+    userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
+  }
+
+  function timestamp() {
+    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function appendMessage(role, text) {
+    const welcome = document.getElementById('welcomeMsg');
+    if (welcome) welcome.remove();
+
+    const div = document.createElement('div');
+    div.className = `message ${role}`;
+
+    // Split off workflow note if present
+    const noteMarker = '[WORKFLOW NOTE]:';
+    let mainText = text;
+    let noteText = null;
+    const noteIdx = text.indexOf(noteMarker);
+    if (noteIdx !== -1) {
+      mainText = text.slice(0, noteIdx).trimEnd();
+      noteText = text.slice(noteIdx + noteMarker.length).trim();
+    }
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = mainText;
+
+    const meta = document.createElement('div');
+    meta.className = 'msg-meta';
+    meta.textContent = role === 'user' ? `You · ${timestamp()}` : `ASG Assistant · ${timestamp()}`;
+
+    div.appendChild(bubble);
+    div.appendChild(meta);
+
+    if (noteText) {
+      const note = document.createElement('div');
+      note.className = 'workflow-note';
+      note.textContent = noteText;
+      div.appendChild(note);
+    }
+
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return div;
+  }
+
+  function appendTyping() {
+    const welcome = document.getElementById('welcomeMsg');
+    if (welcome) welcome.remove();
+
+    const div = document.createElement('div');
+    div.className = 'message assistant';
+    div.id = 'typingIndicator';
+    const dots = document.createElement('div');
+    dots.className = 'typing-dots bubble';
+    dots.innerHTML = '<span></span><span></span><span></span>';
+    div.appendChild(dots);
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function removeTyping() {
+    const t = document.getElementById('typingIndicator');
+    if (t) t.remove();
+  }
+
+  async function sendMessage() {
+    const key = apiKeyInput.value.trim();
+    const msg = userInput.value.trim();
+    if (!key) { alert('Please enter your OpenAI API key.'); apiKeyInput.focus(); return; }
+    if (!msg) return;
+
+    appendMessage('user', msg);
+    userInput.value = '';
+    userInput.style.height = '40px';
+    sendBtn.disabled = true;
+    appendTyping();
+
+    try {
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key: key, message: msg }),
+      });
+      const data = await res.json();
+      removeTyping();
+      if (data.error) {
+        const el = appendMessage('error', '⚠ ' + data.error);
+      } else {
+        appendMessage('assistant', data.response);
+      }
+    } catch (err) {
+      removeTyping();
+      appendMessage('error', '⚠ Network error — is the Flask server running?');
+    } finally {
+      sendBtn.disabled = false;
+      userInput.focus();
+    }
+  }
+</script>
+</body>
+</html>

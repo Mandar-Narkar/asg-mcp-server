@@ -1,0 +1,83 @@
+{
+  "AUTO-001": {
+    "deal_name": "TD Auto Receivables Trust 2024-1",
+    "asset_class": "Auto Loans",
+    "issuer": "TD Auto Finance",
+    "servicer": "TD Auto Finance Services Ltd.",
+    "trustee": "Computershare Trust Company of Canada",
+    "pool_balance": 850000000,
+    "original_pool_balance": 1000000000,
+    "collections_mtd": 42500000,
+    "next_payment_date": "2026-04-15",
+    "waterfall": {
+      "available_funds": 44200000,
+      "senior_fees": 125000,
+      "senior_interest": 3180000,
+      "oc_test_required": 1.08,
+      "oc_test_actual": 1.12,
+      "ic_test_required": 1.25,
+      "ic_test_actual": 1.31,
+      "residual_to_equity": 2100000
+    },
+    "exceptions": {
+      "delinquency_rate": 0.018,
+      "delinquency_threshold": 0.025,
+      "servicer_report_received": true,
+      "coverage_test_pass": true
+    }
+  },
+  "CARD-001": {
+    "deal_name": "TD Credit Card Receivables Trust 2023-3",
+    "asset_class": "Credit Card Receivables",
+    "issuer": "TD Bank",
+    "servicer": "TD Bank",
+    "trustee": "BNY Trust Company of Canada",
+    "pool_balance": 2100000000,
+    "original_pool_balance": 2500000000,
+    "collections_mtd": 189000000,
+    "next_payment_date": "2026-04-20",
+    "waterfall": {
+      "available_funds": 195000000,
+      "senior_fees": 450000,
+      "senior_interest": 8925000,
+      "oc_test_required": 1.10,
+      "oc_test_actual": 1.07,
+      "ic_test_required": 1.20,
+      "ic_test_actual": 1.15,
+      "residual_to_equity": 0
+    },
+    "exceptions": {
+      "delinquency_rate": 0.041,
+      "delinquency_threshold": 0.035,
+      "servicer_report_received": true,
+      "coverage_test_pass": false
+    }
+  },
+  "ABCP-001": {
+    "deal_name": "Maple Leaf Conduit Series 2024-A",
+    "asset_class": "Asset-Backed Commercial Paper",
+    "issuer": "Maple Leaf Structured Finance Inc.",
+    "servicer": "Various (Multi-Seller Conduit)",
+    "trustee": "CIBC Mellon Trust Company",
+    "pool_balance": 500000000,
+    "original_pool_balance": 500000000,
+    "collections_mtd": 0,
+    "next_payment_date": "2026-04-05",
+    "waterfall": {
+      "available_funds": 12500000,
+      "senior_fees": 85000,
+      "senior_interest": 1875000,
+      "oc_test_required": 1.05,
+      "oc_test_actual": 1.06,
+      "ic_test_required": 1.15,
+      "ic_test_actual": 1.18,
+      "residual_to_equity": 540000
+    },
+    "exceptions": {
+      "delinquency_rate": 0.005,
+      "delinquency_threshold": 0.020,
+      "servicer_report_received": false,
+      "coverage_test_pass": true
+    }
+  }
+}
